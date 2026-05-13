@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EliteCoach AI — 12-Week Transformation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --card: #161616;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --accent3: #47c8ff;
+    --text: #f0f0f0;
+    --muted: #666;
+    --success: #4eff91;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--text); }
+
+  .step-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  /* MAIN CONTAINER */
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+
+  /* SCREENS */
+  .screen { display: none; animation: fadeUp 0.5s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WELCOME SCREEN */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 12vw, 96px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .hero-title .highlight { color: var(--accent); }
+  .hero-title .outline {
+    -webkit-text-stroke: 1px var(--text);
+    color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 40px;
+  }
+
+  .data-points-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+
+  .dp-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .dp-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* PROGRESS BAR */
+  .progress-container {
+    margin-bottom: 40px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .progress-label { color: var(--muted); }
+  .progress-count { color: var(--accent); }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* QUESTION CARD */
+  .q-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .q-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .q-text {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .q-hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  /* INPUT STYLES */
+  .input-wrap { position: relative; margin-bottom: 24px; }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 16px 20px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,255,71,0.08);
+  }
+
+  textarea { resize: vertical; min-height: 100px; }
+
+  select option { background: var(--card); }
+
+  /* CHOICE GRID */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .choices.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .choices.cols-1 { grid-template-columns: 1fr; }
+
+  .choice-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .choice-btn .icon { font-size: 20px; flex-shrink: 0; }
+  .choice-btn .label { font-weight: 500; }
+  .choice-btn .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .choice-btn:hover { border-color: var(--accent); background: rgba(232,255,71,0.05); }
+  .choice-btn.selected { border-color: var(--accent); background: rgba(232,255,71,0.1); color: var(--accent); }
+
+  /* RANGE SLIDER */
+  .range-wrap { margin-bottom: 24px; }
+  .range-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+  .range-unit { font-size: 18px; color: var(--muted); }
+
+  input[type="range"] {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    padding: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    padding: 16px 40px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,255,71,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 14px 28px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+
+  /* GENERATING SCREEN */
+  .gen-center { text-align: center; padding: 80px 0; }
+
+  .gen-spinner {
+    width: 80px;
+    height: 80px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 32px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .gen-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+
+  .gen-steps { list-style: none; text-align: left; max-width: 300px; margin: 32px auto 0; }
+  .gen-steps li {
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gen-steps li.done { color: var(--success); }
+  .gen-steps li .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .gen-steps li.done .dot { background: var(--success); }
+  .gen-steps li.active .dot { background: var(--accent); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ===================== RESULTS SCREEN — PREMIUM ===================== */
+
+  /* TOP HERO BANNER */
+  .res-hero {
+    position: relative;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a0a 50%, #0a0f0a 100%);
+    border: 1px solid #2a2a1a;
+    border-radius: 20px;
+    padding: 36px 28px 28px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .res-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(232,255,71,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .res-hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232,255,71,0.15);
+    border: 1px solid rgba(232,255,71,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 2px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .res-hero-tag .dot-live {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  .res-hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 8vw, 58px);
+    letter-spacing: 3px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .res-hero-name span { color: var(--accent); }
+  .res-hero-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 24px;
+  }
+
+  /* PLAN SUMMARY CARD (like zing) */
+  .plan-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 4px;
+  }
+  .plan-card-inner {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    grid-template-rows: 1fr 1px 1fr;
+  }
+  .plan-divider-v {
+    background: rgba(255,255,255,0.07);
+    grid-row: 1 / 4;
+    grid-column: 2;
+  }
+  .plan-divider-h {
+    background: rgba(255,255,255,0.07);
+    grid-column: 1 / 4;
+    height: 1px;
+  }
+  .plan-cell {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .plan-cell-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .plan-cell-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .plan-cell-val {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .plan-cell-val.accent { color: var(--accent); }
+
+  /* NOW vs AFTER comparison */
+  .comparison-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .comparison-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #161616;
+    border-bottom: 1px solid #222;
+  }
+  .comparison-header div {
+    padding: 14px 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-align: center;
+  }
+  .comparison-header .now-label { color: var(--muted); border-right: 1px solid #222; }
+  .comparison-header .after-label { color: var(--accent); }
+
+  .comparison-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .comp-col {
+    padding: 20px;
+  }
+  .comp-col:first-child { border-right: 1px solid #222; }
+
+  .comp-row {
+    margin-bottom: 18px;
+  }
+  .comp-row-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .comp-row-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    line-height: 1;
+  }
+  .comp-col:first-child .comp-row-val { color: #888; }
+  .comp-col:last-child .comp-row-val { color: var(--accent); }
+
+  .muscle-bar-wrap { margin-top: 6px; display: flex; gap: 4px; }
+  .muscle-bar {
+    height: 5px;
+    width: 28px;
+    border-radius: 3px;
+    background: #2a2a2a;
+  }
+  .muscle-bar.filled-now { background: #555; }
+  .muscle-bar.filled-after { background: var(--accent); }
+
+  .comp-disclaimer {
+    text-align: center;
+    padding: 10px;
+    font-size: 11px;
+    color: #444;
+    font-family: 'Space Mono', monospace;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  /* FITNESS SCORE — big ring centered */
+  .score-section {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 20px;
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .score-section-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .big-ring {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 24px;
+  }
+  .big-ring svg { transform: rotate(-90deg); }
+  .big-ring-val {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .big-score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .big-score-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 2px;
+  }
+  .score-sub-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .score-sub-item { text-align: center; }
+  .score-sub-bar-wrap {
+    height: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .score-sub-bar {
+    width: 12px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(to top, var(--accent), rgba(232,255,71,0.3));
+    transition: height 1s ease;
+  }
+  .score-sub-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .score-sub-lbl {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* MACRO RING CARD */
+  .macro-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+  }
+  .macro-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .macro-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .macro-icon { font-size: 18px; width: 28px; text-align: center; }
+  .macro-info { flex: 1; }
+  .macro-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .macro-bar-bg {
+    height: 6px;
+    background: #2a2a2a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s ease;
+  }
+  .macro-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    white-space: nowrap;
+    text-align: right;
+    min-width: 60px;
+  }
+
+  /* SECTION CARDS */
+  .result-section {
+    margin-bottom: 20px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .result-section:hover { border-color: #333; }
+
+  .rs-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .rs-header-left { display: flex; align-items: center; gap: 12px; }
+
+  .rs-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(232,255,71,0.08);
+    border: 1px solid rgba(232,255,71,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .rs-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .rs-title-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 2px;
+  }
+  .rs-chevron {
+    color: var(--muted);
+    font-size: 14px;
+    transition: transform 0.3s;
+  }
+  .rs-chevron.open { transform: rotate(180deg); }
+
+  .rs-body {
+    padding: 22px;
+    display: none;
+    border-top: 1px solid #1a1a1a;
+  }
+  .rs-body.open { display: block; animation: fadeUp 0.3s ease; }
+
+  /* RESULT CONTENT STYLING */
+  .result-content { font-size: 14px; line-height: 1.9; color: #c0c0c0; }
+  .result-content h3 { color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; margin: 20px 0 8px; border-bottom: 1px solid #1e1e1e; padding-bottom: 6px; }
+  .result-content h4 { color: var(--accent3); font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
+  .result-content ul { padding-left: 18px; margin: 8px 0; }
+  .result-content li { margin-bottom: 6px; }
+  .result-content strong { color: var(--text); }
+  .result-content em { color: var(--accent2); font-style: normal; font-weight: 700; }
+  .result-content hr { border: none; border-top: 1px solid #1e1e1e; margin: 16px 0; }
+  .result-content table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .result-content td, .result-content th { border: 1px solid #1e1e1e; padding: 10px 14px; text-align: left; }
+  .result-content th { background: rgba(232,255,71,0.05); color: var(--accent); font-weight: 700; }
+  .result-content tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  /* ERROR */
+  .error-box {
+    background: rgba(255,107,53,0.1);
+    border: 1px solid var(--accent2);
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--accent2);
+    margin-top: 16px;
+  }
+
+  /* LOADING DOTS */
+  .loading-dots::after {
+    content: '';
+    animation: dots 1.5s infinite;
+  }
+  @keyframes dots {
+    0% { content: ''; }
+    33% { content: '.'; }
+    66% { content: '..'; }
+    100% { content: '...'; }
+  }
+
+  /* RESTART BTN */
+  .restart-wrap { text-align: center; padding: 40px 0; border-top: 1px solid #1a1a1a; margin-top: 32px; }
+
+  .input-note {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: -18px;
+    margin-bottom: 20px;
+    padding-left: 4px;
+  }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .choices { grid-template-columns: 1fr; }
+    .data-points-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .score-ring-wrap { flex-direction: column; text-align: center; }
+    .hero-title { font-size: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Elite<span>Coach</span> AI</div>
+  <div class="step-badge" id="stepBadge">READY</div>
+</header>
+
+<div class="container">
+
+  <!-- WELCOME SCREEN -->
+  <div class="screen active" id="screen-welcome">
+    <div class="hero-title">
+      <div>YOUR</div>
+      <div class="highlight">12-WEEK</div>
+      <div class="outline">TRANSFORMATION</div>
+    </div>
+    <p class="hero-sub">
+      An AI Elite Fitness Coach + Clinical Nutritionist analyzes <strong>42 data points</strong> about your body, lifestyle, and goals to build a fully personalized plan — just for you.
+    </p>
+    <div class="data-points-grid">
+      <div class="dp-chip">Body Composition</div>
+      <div class="dp-chip">Fitness Score</div>
+      <div class="dp-chip">Diet & Macros</div>
+      <div class="dp-chip">Workout Plan</div>
+      <div class="dp-chip">Supplements</div>
+      <div class="dp-chip">Habit Tracker</div>
+      <div class="dp-chip">42 Data Points</div>
+      <div class="dp-chip">BMI Analysis</div>
+      <div class="dp-chip">12 Weeks</div>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">
+      Start My Assessment ➜
+    </button>
+  </div>
+
+  <!-- QUESTIONS SCREEN -->
+  <div class="screen" id="screen-questions">
+    <div class="progress-container">
+      <div class="progress-info">
+        <span class="progress-label">Assessment Progress</span>
+        <span class="progress-count" id="progressCount">0 / 42</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- GENERATING SCREEN -->
+  <div class="screen" id="screen-generating">
+    <div class="gen-center">
+      <div class="gen-spinner"></div>
+      <div class="gen-title">BUILDING YOUR PLAN</div>
+      <p style="color:var(--muted); font-size:14px;">Your Elite Coach is analyzing all 42 data points<span class="loading-dots"></span></p>
+      <ul class="gen-steps" id="genSteps">
+        <li id="gs1"><span class="dot"></span> Analyzing body composition</li>
+        <li id="gs2"><span class="dot"></span> Calculating fitness score</li>
+        <li id="gs3"><span class="dot"></span> Designing diet & macros</li>
+        <li id="gs4"><span class="dot"></span> Building workout schedule</li>
+        <li id="gs5"><span class="dot"></span> Selecting supplements</li>
+        <li id="gs6"><span class="dot"></span> Creating habit tracker</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <!-- HERO -->
+    <div class="res-hero" id="resHero">
+      <div class="res-hero-tag"><span class="dot-live"></span> AI GENERATED PLAN</div>
+      <div class="res-hero-name" id="resHeroName">YOUR <span>PLAN</span><br>IS READY</div>
+      <div class="res-hero-sub" id="resHeroSub">12-WEEK · PERSONALIZED · ELITE TRANSFORMATION</div>
+      <!-- plan 2x2 grid -->
+      <div class="plan-card" id="planCard"></div>
+    </div>
+
+    <!-- NOW vs AFTER -->
+    <div class="comparison-card" id="compCard"></div>
+
+    <!-- FITNESS SCORE -->
+    <div class="score-section" id="scoreSection"></div>
+
+    <!-- AI SECTIONS -->
+    <div id="resultSections"></div>
+
+    <div class="restart-wrap">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Want a fresh plan with different goals?</p>
+      <button class="btn-primary" onclick="restartApp()">Start New Assessment ↺</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// QUESTIONS DATA — 42 questions
+// ============================================================
+const questions = [
+  { id:1, section:"PERSONAL INFO", text:"What is your name?", hint:"We'll personalize your plan with your name.", type:"text", placeholder:"Enter your full name" },
+  { id:2, section:"PERSONAL INFO", text:"How old are you?", hint:"Age affects metabolism and recovery.", type:"number", placeholder:"e.g. 28", min:12, max:100 },
+  { id:3, section:"PERSONAL INFO", text:"What is your gender?", hint:"", type:"choice", choices:[{icon:"♂️",label:"Male"},{icon:"♀️",label:"Female"},{icon:"⚧️",label:"Non-binary / Other"}] },
+  { id:4, section:"GOALS", text:"What is your primary goal?", hint:"Pick what matters most right now.", type:"choice", choices:[{icon:"🔥",label:"Fat Loss"},{icon:"💪",label:"Muscle Gain"},{icon:"⚡",label:"Athletic Performance"},{icon:"🧘",label:"General Fitness & Health"}] },
+  { id:5, section:"GOALS", text:"How much guidance do you need?", hint:"Be honest — this shapes how detailed your plan will be.", type:"choice", choices:[{icon:"🗺️",label:"Full step-by-step"},{icon:"🔑",label:"Key principles only"},{icon:"🤝",label:"Somewhere in between"}] },
+  { id:6, section:"GOALS", text:"What is your target physique?", hint:"Pick the body look that matches your dream goal.", type:"choice", choices:[{icon:"🏊",label:"Lean & Athletic"},{icon:"💪",label:"Muscular & Bulky"},{icon:"🤸",label:"Toned & Slim"},{icon:"🏋️",label:"Powerfully Built"}] },
+  { id:7, section:"GOALS", text:"How will you measure success?", hint:"What is your primary success marker?", type:"choice", choices:[{icon:"⚖️",label:"Scale weight (kg)"},{icon:"👖",label:"Clothing size"},{icon:"🏃",label:"Performance & fitness"},{icon:"⚡",label:"Energy & confidence"}] },
+  { id:8, section:"GOALS", text:"Which body area is your top priority?", hint:"Pick the one you want to focus on most.", type:"choice", choices:[{icon:"🫃",label:"Belly / Core"},{icon:"💪",label:"Arms & Chest"},{icon:"🦵",label:"Legs & Glutes"},{icon:"🔄",label:"Full body equally"}] },
+  { id:9, section:"MOTIVATION", text:"What is your emotional 'why'?", hint:"The deeper reason behind wanting to transform.", type:"choice", choices:[{icon:"💍",label:"Wedding / big event"},{icon:"👨‍👩‍👧",label:"Family & health"},{icon:"😎",label:"Confidence & looks"},{icon:"🏅",label:"Sports / competition"}] },
+  { id:10, section:"WORKOUT SETUP", text:"Where will you work out?", hint:"", type:"choice", choices:[{icon:"🏋️",label:"Gym"},{icon:"🏠",label:"Home"},{icon:"🌳",label:"Outdoors"},{icon:"🔀",label:"Mix of all"}] },
+  { id:11, section:"WORKOUT SETUP", text:"What type of gym do you have access to?", hint:"", type:"choice", choices:[{icon:"🏅",label:"Full commercial gym"},{icon:"🔧",label:"Basic gym"},{icon:"🏠",label:"Home gym"},{icon:"❌",label:"No gym"}] },
+  { id:12, section:"WORKOUT SETUP", text:"Do you want cardio included?", hint:"", type:"choice", choices:[{icon:"✅",label:"Yes, definitely"},{icon:"⚡",label:"Minimal / only HIIT"},{icon:"❌",label:"No cardio"}] },
+  { id:13, section:"WORKOUT SETUP", text:"What equipment do you have access to?", hint:"Select all that apply.", type:"choice", choices:[{icon:"🏋️",label:"Full gym machines"},{icon:"🔩",label:"Dumbbells & barbells"},{icon:"🤸",label:"Bodyweight only"},{icon:"🏃",label:"Cardio machines only"}] },
+  { id:14, section:"WORKOUT SETUP", text:"When do you prefer to work out?", hint:"", type:"choice", choices:[{icon:"🌅",label:"Morning"},{icon:"🌞",label:"Afternoon"},{icon:"🌙",label:"Evening"},{icon:"🔀",label:"Varies"}] },
+  { id:15, section:"WORKOUT SETUP", text:"How much time can you spend per session?", hint:"", type:"choice", choices:[{icon:"⚡",label:"30 min"},{icon:"⏱️",label:"45 min"},{icon:"💪",label:"60 min"},{icon:"🔥",label:"90 min+"}] },
+  { id:16, section:"WORKOUT SETUP", text:"Do you play other sports or activities?", hint:"", type:"choice", choices:[{icon:"⚽",label:"Football / Cricket"},{icon:"🏊",label:"Swimming / Cycling"},{icon:"🧘",label:"Yoga / Pilates"},{icon:"❌",label:"No other sports"}] },
+  { id:17, section:"BODY STATS", text:"What is your body type?", hint:"", type:"choice", choices:[{icon:"🪶",label:"Ectomorph (naturally slim)"},{icon:"💪",label:"Mesomorph (athletic)"},{icon:"🌊",label:"Endomorph (stocky/curvy)"},{icon:"🤷",label:"Not sure"}] },
+  { id:18, section:"BODY STATS", text:"What is your estimated body fat %?", hint:"Men avg 15-25%, Women avg 22-32%.", type:"choice", choices:[{icon:"🔵",label:"Under 15% (Very lean)"},{icon:"🟢",label:"15–25% (Average)"},{icon:"🟡",label:"25–35% (Above average)"},{icon:"🔴",label:"35%+ (High body fat)"}] },
+  { id:19, section:"BODY STATS", text:"What is your height?", hint:"Enter in centimeters (e.g. 175 cm)", type:"number", placeholder:"e.g. 175", min:100, max:250 },
+  { id:20, section:"BODY STATS", text:"What is your current weight?", hint:"Enter in kilograms (e.g. 80 kg)", type:"number", placeholder:"e.g. 80", min:30, max:300 },
+  { id:21, section:"BODY STATS", text:"What is your target weight?", hint:"Enter in kilograms — be realistic but ambitious.", type:"number", placeholder:"e.g. 70", min:30, max:300 },
+  { id:22, section:"FITNESS LEVEL", text:"What is your current fitness level?", hint:"", type:"choice", choices:[{icon:"🌱",label:"Beginner (0-6 months)"},{icon:"📈",label:"Intermediate (6mo-2yr)"},{icon:"🏆",label:"Advanced (2+ years)"},{icon:"💤",label:"Completely sedentary"}] },
+  { id:23, section:"FITNESS LEVEL", text:"Describe your past training experience", hint:"", type:"choice", choices:[{icon:"🏋️",label:"Gym training"},{icon:"🏃",label:"Running / cardio only"},{icon:"🤸",label:"Home workouts"},{icon:"❌",label:"No prior training"}] },
+  { id:24, section:"FITNESS LEVEL", text:"Do you have any injuries or physical limitations?", hint:"", type:"choice", choices:[{icon:"🦵",label:"Knee / leg issue"},{icon:"🫀",label:"Back pain"},{icon:"💪",label:"Shoulder / arm issue"},{icon:"✅",label:"No injuries"}] },
+  { id:25, section:"FITNESS LEVEL", text:"Have you tried transformation plans before?", hint:"", type:"choice", choices:[{icon:"✅",label:"Yes — it worked for a while"},{icon:"❌",label:"Yes — but gave up early"},{icon:"🔄",label:"Yes — gained it all back"},{icon:"🆕",label:"No, this is my first time"}] },
+  { id:26, section:"PERFORMANCE TEST", text:"How many push-ups can you do in one set?", hint:"Without stopping, full range of motion.", type:"choice", choices:[{icon:"😬",label:"0–5"},{icon:"👍",label:"6–15"},{icon:"💪",label:"16–30"},{icon:"🔥",label:"30+"}] },
+  { id:27, section:"PERFORMANCE TEST", text:"How many bodyweight squats can you do in one set?", hint:"Without stopping, full depth.", type:"choice", choices:[{icon:"😬",label:"0–10"},{icon:"👍",label:"11–25"},{icon:"💪",label:"26–50"},{icon:"🔥",label:"50+"}] },
+  { id:28, section:"MINDSET", text:"What does exercise mean to you?", hint:"", type:"choice", choices:[{icon:"😩",label:"A necessary chore"},{icon:"😊",label:"My stress relief"},{icon:"🏆",label:"A competition / passion"},{icon:"🤷",label:"I have no opinion yet"}] },
+  { id:29, section:"LIFESTYLE", text:"Describe your current eating habits", hint:"", type:"choice", choices:[{icon:"🍔",label:"Mostly junk / fast food"},{icon:"🍽️",label:"Home cooked but unplanned"},{icon:"⚖️",label:"Fairly balanced diet"},{icon:"🥗",label:"Clean & healthy mostly"}] },
+  { id:30, section:"LIFESTYLE", text:"How do you currently manage stress?", hint:"", type:"choice", choices:[{icon:"😰",label:"Poorly — high stress"},{icon:"🍕",label:"Stress eating"},{icon:"🚶",label:"Exercise / walking"},{icon:"😌",label:"Meditation / breathing"}] },
+  { id:31, section:"LIFESTYLE", text:"How is your sleep?", hint:"", type:"choice", choices:[{icon:"😴",label:"Poor (under 6 hrs)"},{icon:"😐",label:"Average (6-7 hrs)"},{icon:"✅",label:"Good (7-8 hrs)"},{icon:"💤",label:"Excellent (8+ hrs)"}] },
+  { id:32, section:"LIFESTYLE", text:"How many steps do you walk per day on average?", hint:"", type:"choice", choices:[{icon:"🐌",label:"Under 3,000"},{icon:"🚶",label:"3,000–7,000"},{icon:"🏃",label:"7,000–10,000"},{icon:"⚡",label:"10,000+"}] },
+  { id:33, section:"LIFESTYLE", text:"How much water do you drink daily?", hint:"", type:"choice", choices:[{icon:"😬",label:"Under 1 liter"},{icon:"💧",label:"1–2 liters"},{icon:"✅",label:"2–3 liters"},{icon:"💦",label:"3+ liters"}] },
+  { id:34, section:"NUTRITION", text:"Do you have dietary restrictions or preferences?", hint:"", type:"choice", choices:[{icon:"🥦",label:"Vegetarian"},{icon:"🌱",label:"Vegan"},{icon:"🕌",label:"Halal / No pork"},{icon:"🍖",label:"No restrictions"}] },
+  { id:35, section:"TOOLS", text:"Do you use any wearable tech?", hint:"", type:"choice", choices:[{icon:"⌚",label:"Apple Watch / Samsung"},{icon:"📱",label:"Fitness band (Fitbit etc)"},{icon:"❤️",label:"Heart rate monitor only"},{icon:"❌",label:"No wearable tech"}] },
+  { id:36, section:"MINDSET", text:"Why have you failed to stick to plans before?", hint:"", type:"choice", choices:[{icon:"😩",label:"Lost motivation quickly"},{icon:"⏰",label:"No time / too busy"},{icon:"🍕",label:"Diet was too strict"},{icon:"🆕",label:"Never tried before"}] },
+  { id:37, section:"MINDSET", text:"What is getting you started TODAY?", hint:"", type:"choice", choices:[{icon:"🪞",label:"Tired of how I look"},{icon:"🩺",label:"Doctor's advice"},{icon:"💍",label:"Upcoming event"},{icon:"⚡",label:"Just ready for change"}] },
+  { id:38, section:"GOALS", text:"Do you have any upcoming events or deadlines?", hint:"", type:"choice", choices:[{icon:"💍",label:"Wedding / engagement"},{icon:"✈️",label:"Vacation / holiday"},{icon:"🏅",label:"Sports competition"},{icon:"❌",label:"No specific deadline"}] },
+  { id:39, section:"SUPPORT", text:"What kind of support do you need most?", hint:"", type:"choice", choices:[{icon:"📋",label:"Detailed plans & tracking"},{icon:"🤝",label:"Accountability & check-ins"},{icon:"🧠",label:"Mindset & motivation"},{icon:"🍽️",label:"Nutrition guidance"}] },
+  { id:40, section:"MINDSET", text:"How confident are you that you'll complete this?", hint:"1 = No confidence, 10 = Absolutely certain", type:"range", min:1, max:10, defaultVal:7, unit:"/10" },
+  { id:41, section:"GOALS", text:"How fast do you want to transform?", hint:"Realistic = 0.5-1kg/week. Aggressive = 1-1.5kg/week.", type:"choice", choices:[{icon:"🐢",label:"Slow & sustainable"},{icon:"⚖️",label:"Balanced pace"},{icon:"🚀",label:"Fast as possible"},{icon:"🏆",label:"Competition-ready"}] },
+  { id:42, section:"FINAL", text:"Confirm your age (data validation)", hint:"Just re-enter your age to cross-validate.", type:"number", placeholder:"e.g. 28", min:12, max:100 }
+];
+
+let currentQ = 0;
+let answers = {};
+
+// ============================================================
+function startQuiz() {
+  showScreen('questions');
+  renderQuestion(0);
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  const pct = Math.round((idx / 42) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = idx + ' / 42';
+  document.getElementById('stepBadge').textContent = `Q ${idx+1} / 42`;
+
+  const area = document.getElementById('questionArea');
+  const current = answers[q.id] || '';
+
+  let inputHTML = '';
+
+  if (q.type === 'text') {
+    inputHTML = `<div class="input-wrap"><input type="text" id="qInput" placeholder="${q.placeholder}" value="${current}"></div>`;
+  } else if (q.type === 'number') {
+    const noteMap = {
+      19: '📏 Enter in cm — e.g. 5\'9" = 175 cm',
+      20: '⚖️ Enter in kg — e.g. 176 lbs = 80 kg',
+      21: '🎯 Enter your goal weight in kg',
+      2:  '🎂 Your age in years',
+      42: '✅ Re-enter your age to confirm'
+    };
+    const note = noteMap[q.id] ? `<div class="input-note">${noteMap[q.id]}</div>` : '';
+    inputHTML = `<div class="input-wrap"><input type="number" id="qInput" placeholder="${q.placeholder}" value="${current}" min="${q.min}" max="${q.max}"></div>${note}`;
+  } else if (q.type === 'textarea') {
+    inputHTML = `<div class="input-wrap"><textarea id="qInput" placeholder="${q.placeholder}">${current}</textarea></div>`;
+  } else if (q.type === 'choice') {
+    const cols = q.choices.length === 3 ? 'cols-3' : q.choices.length === 2 ? 'cols-1' : '';
+    inputHTML = `<div class="choices ${cols}" id="choicesWrap">` +
+      q.choices.map((c,i) => `<button class="choice-btn${current === c.label ? ' selected':''}" onclick="selectChoice('${c.label.replace(/'/g,"\\'")}', this)">${c.icon ? `<span class="icon">${c.icon}</span>`:''}<div><div class="label">${c.label}</div>${c.sub ? `<div class="sub">${c.sub}</div>`:''}</div></button>`).join('') +
+    `</div>`;
+  } else if (q.type === 'range') {
+    const val = current || q.defaultVal;
+    inputHTML = `<div class="range-wrap">
+      <div class="range-val"><span id="rangeVal">${val}</span><span class="range-unit">${q.unit}</span></div>
+      <input type="range" id="qInput" min="${q.min}" max="${q.max}" value="${val}" oninput="document.getElementById('rangeVal').textContent=this.value">
+    </div>`;
+  }
+
+  area.innerHTML = `
+    <div class="q-section-label">${q.section}</div>
+    <div class="q-number">QUESTION ${q.id} OF 42</div>
+    <div class="q-text">${q.text}</div>
+    ${q.hint ? `<div class="q-hint">${q.hint}</div>` : ''}
+    ${inputHTML}
+    <div class="btn-row">
+      ${idx > 0 ? `<button class="btn-secondary" onclick="goBack()">← Back</button>` : ''}
+      <button class="btn-primary" onclick="nextQuestion()" id="nextBtn">${idx === 41 ? '🚀 Generate My Plan' : 'Next →'}</button>
+    </div>
+    <div id="qError"></div>
+  `;
+
+  // Auto-focus
+  const inp = document.getElementById('qInput');
+  if (inp && (q.type === 'text' || q.type === 'number' || q.type === 'textarea')) {
+    setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function selectChoice(val, btn) {
+  btn.closest('.choices').querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[questions[currentQ].id] = val;
+}
+
+function nextQuestion() {
+  const q = questions[currentQ];
+  let val = '';
+
+  if (q.type === 'choice') {
+    val = answers[q.id] || '';
+    if (!val) { showError('Please select an option to continue.'); return; }
+  } else if (q.type === 'range') {
+    val = document.getElementById('qInput').value;
+    answers[q.id] = val;
+  } else {
+    const inp = document.getElementById('qInput');
+    val = inp ? inp.value.trim() : '';
+    if (!val) { showError('Please provide an answer to continue.'); return; }
+    answers[q.id] = val;
+  }
+
+  if (currentQ === 41) {
+    generatePlan();
+    return;
+  }
+  currentQ++;
+  renderQuestion(currentQ);
+}
+
+function goBack() {
+  if (currentQ > 0) { currentQ--; renderQuestion(currentQ); }
+}
+
+function showError(msg) {
+  const el = document.getElementById('qError');
+  if (el) { el.innerHTML = `<div class="error-box">⚠️ ${msg}</div>`; }
+}
+
+// ============================================================
+// GENERATE PLAN
+// ============================================================
+async function generatePlan() {
+  showScreen('generating');
+  animateGenSteps();
+
+  const prompt = buildPrompt();
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || `API error ${response.status}`);
+    }
+    if (!data.content || !Array.isArray(data.content)) {
+      throw new Error('Invalid response from AI. Please try again.');
+    }
+    const text = data.content.map(i => i.text || '').join('\n');
+    showResults(text);
+  } catch (err) {
+    showScreen('questions');
+    currentQ = 41;
+    renderQuestion(currentQ);
+    document.getElementById('qError').innerHTML = `<div class="error-box">❌ Failed to generate plan. Please try again. (${err.message})</div>`;
+  }
+}
+
+function buildPrompt() {
+  const a = answers;
+  // Extract body fat % from choice label
+  const bfMap = {'Under 15% (Very lean)':'~12%','15–25% (Average)':'~20%','25–35% (Above average)':'~30%','35%+ (High body fat)':'~38%'};
+  const bf = bfMap[a[18]] || a[18] || 'Unknown';
+  return `You are a World-Class Elite Fitness Coach and Clinical Nutritionist. Based on the following 42 data points, create a highly personalized 12-week body transformation plan.
+
+CLIENT DATA:
+1. Name: ${a[1]}
+2. Age: ${a[2]}
+3. Gender: ${a[3]}
+4. Primary Goal: ${a[4]}
+5. Guidance Preference: ${a[5]}
+6. Target Physique: ${a[6]}
+7. Success Metrics: ${a[7]}
+8. Focus Areas: ${a[8]}
+9. Emotional Motivation: ${a[9]}
+10. Workout Location: ${a[10]}
+11. Gym Type: ${a[11]}
+12. Cardio Preference: ${a[12]}
+13. Available Equipment: ${a[13]}
+14. Preferred Workout Time: ${a[14]}
+15. Time Per Session: ${a[15]}
+16. Other Sports/Activities: ${a[16]}
+17. Body Type: ${a[17]}
+18. Body Fat %: ${bf}
+19. Height: ${a[19]} cm
+20. Current Weight: ${a[20]} kg
+21. Target Weight: ${a[21]} kg
+22. Fitness Level: ${a[22]}
+23. Past Training: ${a[23]}
+24. Injury History: ${a[24]}
+25. Past Attempts: ${a[25]}
+26. Max Push-ups: ${a[26]}
+27. Max Squats: ${a[27]}
+28. Meaning of Exercise: ${a[28]}
+29. Eating Habits: ${a[29]}
+30. Stress Management: ${a[30]}
+31. Sleep: ${a[31]}
+32. Daily Steps: ${a[32]}
+33. Water Intake: ${a[33]}
+34. Dietary Restrictions: ${a[34]}
+35. Wearable Tech: ${a[35]}
+36. Past Failures: ${a[36]}
+37. Starting Motivation: ${a[37]}
+38. Upcoming Events: ${a[38]}
+39. Support Needs: ${a[39]}
+40. Confidence Level: ${a[40]}/10
+41. Transformation Speed: ${a[41]}
+42. Age (Validation): ${a[42]}
+
+Please provide a comprehensive response in EXACTLY this format with these 6 section headers:
+
+## 1. BODY COMPOSITION INSIGHTS & BMI ANALYSIS
+[Provide: BMI calculation, body fat analysis, lean mass estimate, health risk assessment, realistic expectations for 12 weeks, week-by-week projected milestones]
+
+## 2. FITNESS SCORE (0-100)
+[Give a score out of 100 and break it down into: Strength Score, Cardio Score, Flexibility Score, Lifestyle Score, Nutrition Score. Explain each score and what it means.]
+
+## 3. OPTIMIZED DIET PLAN WITH CALORIES AND MACROS
+[Include: Daily caloric target, Protein/Carbs/Fats in grams and %, meal timing, 3 sample meal plans (training day, rest day, high-carb day), food list tailored to their restrictions, weekly cheat meal guidance]
+
+## 4. CUSTOM WORKOUT SCHEDULE (12 WEEKS)
+[Include: Phase 1 (Weeks 1-4), Phase 2 (Weeks 5-8), Phase 3 (Weeks 9-12). For each phase give the weekly split, then Day 1-6 with exercises, sets, reps, rest periods. Make it specific to their equipment and location.]
+
+## 5. NUTRITION & SUPPLEMENT GUIDANCE
+[Include: Core supplements (if beneficial), timing of supplements, foods to eat more of, foods to avoid, pre/post workout nutrition, hydration protocol]
+
+## 6. DAILY HABIT TRACKER & MINDSET COACHING
+[Include: Morning routine, daily checklist (10 habits), weekly check-in protocol, how to handle relapses, motivational strategy specific to their why, how to handle past failure patterns, a personal message to ${a[1]}]
+
+Make this deeply personal, specific to every data point provided, and motivating. Use ${a[1]}'s name throughout. Be direct, expert, and actionable.`;
+}
+
+function animateGenSteps() {
+  const steps = ['gs1','gs2','gs3','gs4','gs5','gs6'];
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) {
+      document.getElementById(steps[i-1]).classList.remove('active');
+      document.getElementById(steps[i-1]).classList.add('done');
+    }
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 1200);
+}
+
+// ============================================================
+// SHOW RESULTS — PREMIUM DASHBOARD
+// ============================================================
+function showResults(text) {
+  const name = answers[1] || 'Athlete';
+  const weight = parseFloat(answers[20]) || 75;
+  const height = parseFloat(answers[19]) || 170;
+  const targetWeight = parseFloat(answers[21]) || 70;
+  const bmi = (weight / ((height/100)**2)).toFixed(1);
+  const tolose = (weight - targetWeight).toFixed(1);
+  const goal = answers[4] || 'Transformation';
+  const level = answers[22] || 'Beginner';
+  const speed = answers[41] || 'Balanced pace';
+
+  const bfLabels = {'Under 15% (Very lean)':'<15%','15–25% (Average)':'15–25%','25–35% (Above average)':'25–35%','35%+ (High body fat)':'35%+'};
+  const bfNow = bfLabels[answers[18]] || '~20%';
+  const bfAfterMap = {'Under 15% (Very lean)':'8–12%','15–25% (Average)':'10–15%','25–35% (Above average)':'18–24%','35%+ (High body fat)':'28–33%'};
+  const bfAfter = bfAfterMap[answers[18]] || '12–18%';
+
+  // Extract fitness score
+  let scoreNum = 62;
+  const scoreMatch = text.match(/(?:overall|total|fitness)?\s*score[:\s]+(\d+)/i);
+  if (scoreMatch) scoreNum = Math.min(100, parseInt(scoreMatch[1]));
+
+  // Sub-scores (estimated from answers)
+  const strengthScore = answers[26] === '30+' ? 80 : answers[26] === '16–30' ? 62 : answers[26] === '6–15' ? 44 : 28;
+  const cardioScore = answers[32] === '10,000+' ? 78 : answers[32] === '7,000–10,000' ? 60 : answers[32] === '3,000–7,000' ? 42 : 25;
+  const lifestyleScore = answers[31] === 'Excellent (8+ hrs)' ? 85 : answers[31] === 'Good (7-8 hrs)' ? 68 : answers[31] === 'Average (6-7 hrs)' ? 48 : 30;
+  const nutritionScore = answers[29] === 'Clean & healthy mostly' ? 80 : answers[29] === 'Fairly balanced diet' ? 60 : answers[29] === 'Home cooked but unplanned' ? 42 : 28;
+  const flexScore = Math.round((strengthScore + cardioScore + lifestyleScore) / 3 * 0.85);
+
+  // HERO NAME
+  document.getElementById('resHeroName').innerHTML = `${name.toUpperCase().split(' ')[0]}'S<br><span>ELITE PLAN</span>`;
+
+  // PLAN CARD 2x2
+  document.getElementById('planCard').innerHTML = `
+    <div class="plan-card-inner">
+      <div class="plan-cell">
+        <div class="plan-cell-icon">🎯</div>
+        <div class="plan-cell-label">Your Goal</div>
+        <div class="plan-cell-val accent">${goal}</div>
+      </div>
+      <div class="plan-divider-v"></div>
+      <div class="plan-cell">
+        <div class="plan-cell-icon">⏱️</div>
+        <div class="plan-cell-label">Duration</div>
+        <div class="plan-cell-val">12 Weeks</div>
+      </div>
+      <div class="plan-divider-h"></div>
+      <div class="plan-cell">
+        <div class="plan-cell-icon">⚖️</div>
+        <div class="plan-cell-label">Target Weight</div>
+        <div class="plan-cell-val">${targetWeight} Kg</div>
+      </div>
+      <div class="plan-divider-v"></div>
+      <div class="plan-cell">
+        <div class="plan-cell-icon">📈</div>
+        <div class="plan-cell-label">Your Level</div>
+        <div class="plan-cell-val">${level.split(' ')[0]}</div>
+      </div>
+    </div>`;
+
+  // NOW vs AFTER card
+  const muscleBarsNow = [1,2,3,4,5].map(i => `<div class="muscle-bar ${i<=2?'filled-now':''}"></div>`).join('');
+  const muscleBarsAfter = [1,2,3,4,5].map(i => `<div class="muscle-bar ${i<=4?'filled-after':''}"></div>`).join('');
+  document.getElementById('compCard').innerHTML = `
+    <div class="comparison-header">
+      <div class="now-label">Now</div>
+      <div class="after-label">After Program</div>
+    </div>
+    <div class="comparison-stats">
+      <div class="comp-col">
+        <div class="comp-row">
+          <div class="comp-row-label">Weight</div>
+          <div class="comp-row-val">${weight} kg</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">Body Fat</div>
+          <div class="comp-row-val">${bfNow}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">BMI</div>
+          <div class="comp-row-val">${bmi}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">Muscle Mass</div>
+          <div class="muscle-bar-wrap">${muscleBarsNow}</div>
+        </div>
+      </div>
+      <div class="comp-col">
+        <div class="comp-row">
+          <div class="comp-row-label">Weight</div>
+          <div class="comp-row-val">${targetWeight} kg</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">Body Fat</div>
+          <div class="comp-row-val">${bfAfter}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">BMI</div>
+          <div class="comp-row-val">${(targetWeight/((height/100)**2)).toFixed(1)}</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-row-label">Muscle Mass</div>
+          <div class="muscle-bar-wrap">${muscleBarsAfter}</div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-disclaimer">This is not a guarantee or promise of results</div>`;
+
+  // FITNESS SCORE
+  const circ = 2 * Math.PI * 66;
+  const offset = circ - (scoreNum / 100) * circ;
+  const subScores = [
+    {label:'Strength', val: strengthScore},
+    {label:'Cardio',   val: cardioScore},
+    {label:'Flex',     val: flexScore},
+    {label:'Lifestyle',val: lifestyleScore},
+    {label:'Nutrition',val: nutritionScore},
+  ];
+  const subBars = subScores.map(s => `
+    <div class="score-sub-item">
+      <div class="score-sub-bar-wrap">
+        <div class="score-sub-bar" style="height:${(s.val/100)*36}px"></div>
+      </div>
+      <div class="score-sub-num">${s.val}</div>
+      <div class="score-sub-lbl">${s.label}</div>
+    </div>`).join('');
+  document.getElementById('scoreSection').innerHTML = `
+    <div class="score-section-label">⚡ Fitness Score Analysis</div>
+    <div class="big-ring">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="66" fill="none" stroke="#1e1e1e" stroke-width="8"/>
+        <circle cx="80" cy="80" r="66" fill="none" stroke="#e8ff47" stroke-width="8"
+          stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+      </svg>
+      <div class="big-ring-val">
+        <div class="big-score-num">${scoreNum}</div>
+        <div class="big-score-label">/ 100</div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:#888;margin-bottom:20px;">${getScoreMessage(scoreNum, name)}</p>
+    <div class="score-sub-grid">${subBars}</div>`;
+
+  // AI SECTIONS — collapsible cards
+  const sectionDefs = [
+    { icon:'📊', title:'Body Composition & BMI', sub:'ANALYSIS · PROJECTIONS' },
+    { icon:'⚡', title:'Fitness Score Breakdown', sub:'STRENGTH · CARDIO · LIFESTYLE' },
+    { icon:'🥗', title:'Diet Plan & Macros', sub:'CALORIES · PROTEIN · CARBS · FATS' },
+    { icon:'💪', title:'12-Week Workout Schedule', sub:'PHASE 1 · 2 · 3 · EXERCISES' },
+    { icon:'💊', title:'Nutrition & Supplements', sub:'TIMING · FOODS · HYDRATION' },
+    { icon:'📋', title:'Habit Tracker & Mindset', sub:'DAILY CHECKLIST · MOTIVATION' },
+  ];
+
+  const parsedSections = parseAISections(text, sectionDefs);
+
+  const sectionsHTML = parsedSections.map((s, i) => `
+    <div class="result-section">
+      <div class="rs-header" onclick="toggleSection(${i})">
+        <div class="rs-header-left">
+          <div class="rs-icon-wrap">${s.icon}</div>
+          <div>
+            <div class="rs-title">${s.title}</div>
+            <div class="rs-title-sub">${s.sub}</div>
+          </div>
+        </div>
+        <div class="rs-chevron" id="chev-${i}">▼</div>
+      </div>
+      <div class="rs-body ${i===0?'open':''}" id="rsb-${i}">
+        <div class="result-content">${formatContent(s.content)}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('resultSections').innerHTML = sectionsHTML;
+  showScreen('results');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleSection(i) {
+  const body = document.getElementById('rsb-'+i);
+  const chev = document.getElementById('chev-'+i);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function parseAISections(text, defs) {
+  const results = [];
+  for (let i = 0; i < defs.length; i++) {
+    const startPattern = new RegExp(`##\\s*${i+1}\\.`, 'i');
+    const startMatch = text.search(startPattern);
+    if (startMatch === -1) {
+      results.push({ ...defs[i], content: text.substring(0, 500) });
+      continue;
+    }
+    let endIdx = text.length;
+    if (i < defs.length - 1) {
+      const nextPattern = new RegExp(`##\\s*${i+2}\\.`, 'i');
+      const nextMatch = text.search(nextPattern);
+      if (nextMatch !== -1) endIdx = nextMatch;
+    }
+    const content = text.substring(startMatch, endIdx).replace(/^##.*\n/, '').trim();
+    results.push({ ...defs[i], content });
+  }
+  return results;
+}
+
+function formatContent(text) {
+  return text
+    .replace(/### (.+)/g, '<h3>$1</h3>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/#### (.+)/g, '<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function getScoreMessage(score, name) {
+  if (score >= 80) return `${name}, you're already in great shape! This plan will push you to elite level.`;
+  if (score >= 60) return `${name}, solid foundation! This plan will help you break through to the next level.`;
+  if (score >= 40) return `${name}, you have significant room to grow — and that means big, fast results are coming!`;
+  return `${name}, you're starting fresh — and that's actually your biggest advantage. You'll see dramatic changes fast.`;
+}
+
+function restartApp() {
+  answers = {};
+  currentQ = 0;
+  showScreen('welcome');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
